@@ -15,3 +15,48 @@ def get_connection():
 
     return sqlite3.connect(DB_PATH)
 
+def load_order_items_to_df(conn) -> pd.DataFrame:
+    query = """
+            SELECT 
+                oi.order_item_id
+                , oi.order_id
+                , oi.product_id
+                , oi.quantity
+                , oi.unit_price
+                , oi.discount
+                , p.name
+                , p.discount_pct
+                , p.start_date
+                , p.end_date
+            FROM order_items oi
+            JOIN promotions p ON p.promotion_id = oi.promotion_id
+            """
+    df = pd.read_sql_query(query, conn)
+    return df
+
+def load_orders_to_df(conn) -> pd.DataFrame:
+    query = """
+            SELECT
+                order_id
+                , o.order_date
+                , o.customer_id
+                , o.employee_id
+                , o.status
+                , o.ship_country
+                , o.ship_city
+            FROM orders o
+            """
+    df = pd.read_sql_query(query, conn)
+    return df
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(HERE, 'online_store.db')
+connect = get_connection()
+
+
+order_items = load_order_items_to_df(connect)
+# print(order_items.head(5))
+
+
+orders = load_orders_to_df(connect)
+# print(orders.head(5))
