@@ -89,3 +89,50 @@ sns.barplot(data=revenue_by_years, x='year', y='revenue', palette='Set2')
 plt.show()
 #############################
 
+
+#Динаміка продажів за місяцями. Побудувати графік доходу та кількості замовлень за місяцями за весь період (2022–2025). Використати лінійний графік Seaborn і додати ковзне середнє.
+df = orders.merge(order_items, on="order_id")
+
+df["order_date"] = pd.to_datetime(df["order_date"])
+df["month"] = df["order_date"].dt.to_period("M").astype(str)
+
+df["revenue"] = df["quantity"] * df["unit_price"]
+
+monthly_stats = (
+    df.groupby("month", as_index=False)
+      .agg(
+          revenue=("revenue", "sum"),
+          orders_count=("order_id", "nunique")
+      )
+)
+
+monthly_stats["revenue_ma"] = monthly_stats["revenue"].rolling(window=3).mean()
+monthly_stats["orders_ma"] = monthly_stats["orders_count"].rolling(window=3).mean()
+
+print(monthly_stats)
+
+plt.figure(figsize=(14, 6))
+
+sns.lineplot(data=monthly_stats, x="month", y="revenue", label="Revenue")
+sns.lineplot(data=monthly_stats, x="month", y="revenue_ma", label="Revenue MA(3)")
+
+plt.title("Revenue by Month")
+plt.xlabel("Month")
+plt.ylabel("Revenue")
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(14, 6))
+
+sns.lineplot(data=monthly_stats, x="month", y="orders_count", label="Orders Count")
+sns.lineplot(data=monthly_stats, x="month", y="orders_ma", label="Orders MA(3)")
+
+plt.title("Orders Count by Month")
+plt.xlabel("Month")
+plt.ylabel("Orders Count")
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+plt.show()
