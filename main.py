@@ -182,6 +182,23 @@ DB_PATH = os.path.join(HERE, 'online_store.db')
 connect = get_connection()
 
 customers = load_customers_to_df(connect)
+customers['email'] = customers['email'].fillna('no_data')
+customers['card_last4'] = customers['card_last4'].astype(int)
+customers['signup_date'] = pd.to_datetime(customers['signup_date'])
+customers['birth_date'] = pd.to_datetime(customers['birth_date'])
+customers['gender'] = customers['gender'].str.lower().replace('','no_data')
+customers['city'] = customers['city'].str.strip().str.capitalize() 
+
+country_mapping = {
+    'poland': 'PL', 'polska': 'PL', 'pl': 'PL',
+    'united kingdom': 'UK', 'u.k.': 'UK', 'uk': 'UK', 'britain': 'UK',
+    'united states': 'US', 'u.s.a.': 'US', 'usa': 'US', 'us': 'US',
+    'germany': 'DE', 'deutschland': 'DE', 'de': 'DE',
+    'france': 'FR', 'fr': 'FR',
+    'spain': 'ES', 'españa': 'ES', 'es': 'ES',
+    'italy': 'IT', 'italia': 'IT', 'it': 'IT'
+}
+customers['country'] = customers['country'].str.strip().str.replace(country_mapping)
 # print(customers.head(5))
 
 products = load_products_to_df(connect)
