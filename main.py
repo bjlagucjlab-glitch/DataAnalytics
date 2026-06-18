@@ -136,3 +136,77 @@ plt.xticks(rotation=45)
 
 plt.tight_layout()
 plt.show()
+
+
+########## ТОП КАТЕГОРІЇ
+products = load_products_to_df(connect)
+
+df = order_items.merge(products, on="product_id")
+
+df["revenue"] = df["quantity"] * df["unit_price"]
+df["margin"] = df["quantity"] * (df["price"] - df["cost"])
+
+top_products_revenue = (
+    df.groupby("product", as_index=False)["revenue"]
+      .sum()
+      .sort_values("revenue", ascending=False)
+      .head(10)
+)
+
+top_products_margin = (
+    df.groupby("product", as_index=False)["margin"]
+      .sum()
+      .sort_values("margin", ascending=False)
+      .head(10)
+)
+
+top_categories_revenue = (
+    df.groupby("category", as_index=False)["revenue"]
+      .sum()
+      .sort_values("revenue", ascending=False)
+      .head(10)
+)
+
+top_categories_margin = (
+    df.groupby("category", as_index=False)["margin"]
+      .sum()
+      .sort_values("margin", ascending=False)
+      .head(10)
+)
+
+print(top_products_revenue)
+print(top_products_margin)
+print(top_categories_revenue)
+print(top_categories_margin)
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=top_products_revenue, x="revenue", y="product")
+plt.title("Top 10 Products by Revenue")
+plt.xlabel("Revenue")
+plt.ylabel("Product")
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=top_products_margin, x="margin", y="product")
+plt.title("Top 10 Products by Margin")
+plt.xlabel("Margin")
+plt.ylabel("Product")
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=top_categories_revenue, x="revenue", y="category")
+plt.title("Top 10 Categories by Revenue")
+plt.xlabel("Revenue")
+plt.ylabel("Category")
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.barplot(data=top_categories_margin, x="margin", y="category")
+plt.title("Top 10 Categories by Margin")
+plt.xlabel("Margin")
+plt.ylabel("Category")
+plt.tight_layout()
+plt.show()
