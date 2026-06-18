@@ -72,8 +72,20 @@ connect = get_connection()
 order_items = load_order_items_to_df(connect)
 # print(order_items.head(5))
 
-
 orders = load_orders_to_df(connect)
 # print(orders.head(5))
 
 products = load_products_to_df(connect)
+
+#CRIIIIIIIIIIIIIIIIIIIIIIIIIT
+completed_orders = orders[orders['status'] == 'completed']
+full_orders = completed_orders.merge(order_items, on='order_id', how='inner')
+full_orders['revenue'] = full_orders['unit_price'] * full_orders['quantity'] * (1 - full_orders['discount'])
+full_orders['order_date'] = pd.to_datetime(full_orders['order_date'])
+full_orders['year'] = full_orders['order_date'].dt.year
+y_2022_to_2025 =  full_orders[full_orders['year'].between(2022, 2025)]
+revenue_by_years = y_2022_to_2025.groupby('year')['revenue'].sum().reset_index()
+sns.barplot(data=revenue_by_years, x='year', y='revenue', palette='Set2')
+plt.show()
+#############################
+
