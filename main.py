@@ -156,6 +156,17 @@ def load_payments_to_df(conn) -> pd.DataFrame:
             """
     df = pd.read_sql_query(query, conn)
     return df
+    
+def load_promotions_to_df(conn) -> pd.DataFrame:
+    query = """
+            SELECT
+                promotion_id
+                , name AS promotion
+                , discount_pct AS discount_pct_pr
+            FROM promotions
+            """
+    df = pd.read_sql_query(query, conn)
+    return df
 
 def load_order_items_to_df(conn) -> pd.DataFrame:
     query = """
@@ -215,6 +226,8 @@ returns = load_returns_to_df(connect)
 
 inventory = load_inventory_to_df(connect)
 # print(inventory.head(5))
+
+promotions = load_promotions_to_df(connect)
 
 shipments = load_shipments_to_df(connect)
 # print(shipments.head(5))
