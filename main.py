@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 def get_connection():
     if not os.path.exists(DB_PATH):
         raise SystemExit(f"Database not found {DB_PATH} ")
@@ -156,7 +157,7 @@ def load_payments_to_df(conn) -> pd.DataFrame:
             """
     df = pd.read_sql_query(query, conn)
     return df
-    
+
 def load_promotions_to_df(conn) -> pd.DataFrame:
     query = """
             SELECT
@@ -177,12 +178,12 @@ def load_order_items_to_df(conn) -> pd.DataFrame:
                 , oi.quantity
                 , oi.unit_price
                 , oi.discount
-                , p.name
+                , p.name as promotion
                 , p.discount_pct
                 , p.start_date
                 , p.end_date
             FROM order_items oi
-            JOIN promotions p ON p.promotion_id = oi.promotion_id
+            LEFT JOIN promotions p ON p.promotion_id = oi.promotion_id
             """
     df = pd.read_sql_query(query, conn)
     return df
@@ -193,23 +194,6 @@ DB_PATH = os.path.join(HERE, 'online_store.db')
 connect = get_connection()
 
 customers = load_customers_to_df(connect)
-customers['email'] = customers['email'].fillna('no_data')
-customers['card_last4'] = customers['card_last4'].astype(int)
-customers['signup_date'] = pd.to_datetime(customers['signup_date'])
-customers['birth_date'] = pd.to_datetime(customers['birth_date'])
-customers['gender'] = customers['gender'].str.lower().replace('','no_data')
-customers['city'] = customers['city'].str.strip().str.capitalize() 
-
-country_mapping = {
-    'poland': 'PL', 'polska': 'PL', 'pl': 'PL',
-    'united kingdom': 'UK', 'u.k.': 'UK', 'uk': 'UK', 'britain': 'UK',
-    'united states': 'US', 'u.s.a.': 'US', 'usa': 'US', 'us': 'US',
-    'germany': 'DE', 'deutschland': 'DE', 'de': 'DE',
-    'france': 'FR', 'fr': 'FR',
-    'spain': 'ES', 'españa': 'ES', 'es': 'ES',
-    'italy': 'IT', 'italia': 'IT', 'it': 'IT'
-}
-customers['country'] = customers['country'].str.strip().str.replace(country_mapping)
 # print(customers.head(5))
 
 products = load_products_to_df(connect)
@@ -227,8 +211,6 @@ returns = load_returns_to_df(connect)
 inventory = load_inventory_to_df(connect)
 # print(inventory.head(5))
 
-promotions = load_promotions_to_df(connect)
-
 shipments = load_shipments_to_df(connect)
 # print(shipments.head(5))
 
@@ -242,17 +224,43 @@ order_items = load_order_items_to_df(connect)
 # print(order_items.head(5))
 
 
-#CRIIIIIIIIIIIIIIIIIIIIIIIIIT
+# customers.info()
+customers['email'] = customers['email'].fillna('no_data')
+customers['card_last4'] = customers['card_last4'].astype(int)
+customers['signup_date'] = pd.to_datetime(customers['signup_date'])
+customers['birth_date'] = pd.to_datetime(customers['birth_date'])
+customers['gender'] = customers['gender'].str.lower().replace('','no_data')
+customers['city'] = customers['city'].str.strip().str.capitalize() 
+
+country_mapping = {
+    'poland': 'PL', 'polska': 'PL', 'pl': 'PL',
+    'united kingdom': 'UK', 'u.k.': 'UK', 'uk': 'UK', 'britain': 'UK',
+    'united states': 'US', 'u.s.a.': 'US', 'usa': 'US', 'us': 'US',
+    'germany': 'DE', 'deutschland': 'DE', 'de': 'DE',
+    'france': 'FR', 'fr': 'FR',
+    'spain': 'ES', 'españa': 'ES', 'es': 'ES',
+    'italy': 'IT', 'italia': 'IT', 'it': 'IT'
+}
+customers['country'] = customers['country'].str.strip().str.replace(country_mapping)
+
+promotions = load_promotions_to_df(connect)
+
+
+#CRIT «Рада директорів через 15 хвилин»  
 completed_orders = orders[orders['status'] == 'completed']
 full_orders = completed_orders.merge(order_items, on='order_id', how='inner')
-full_orders['revenue'] = full_orders['unit_price'] * full_orders['quantity'] * (1 - full_orders['discount'])
+revenue_clean = (
+    full_orders['unit_price'] * full_orders['quantity'] * (1 - full_orders['discount'].fillna(0)) * (1 - full_orders['discount_pct'].fillna(0))
+)
+full_orders['revenue'] = revenue_clean
 full_orders['order_date'] = pd.to_datetime(full_orders['order_date'])
 full_orders['year'] = full_orders['order_date'].dt.year
-y_2022_to_2025 =  full_orders[full_orders['year'].between(2022, 2025)]
+y_2022_to_2025 = full_orders[full_orders['year'].between(2022, 2025)].copy()
 revenue_by_years = y_2022_to_2025.groupby('year')['revenue'].sum().reset_index()
+
+plt.figure(figsize=(10, 6))
 sns.barplot(data=revenue_by_years, x='year', y='revenue', palette='Set2')
 plt.show()
-#############################
 
 
 #Динаміка продажів за місяцями. Побудувати графік доходу та кількості замовлень за місяцями за весь період (2022–2025). Використати лінійний графік Seaborn і додати ковзне середнє.
@@ -303,7 +311,7 @@ plt.tight_layout()
 plt.show()
 
 
-########## ТОП КАТЕГОРІЇ
+########## Топкатегорії та товари.
 
 df = order_items.merge(products, on="product_id")
 
@@ -351,4 +359,46 @@ ax[1, 0].set_title("Top 10 Categories by Revenue")
 
 sns.barplot(data=top_categories_margin, x="margin", y="category", ax=ax[1, 1], palette='Set2')
 ax[1, 1].set_title("Top 10 Categories by Margin")
+plt.show()
+
+#Аналіз ефективності промоакцій. 
+df = order_items.merge(products[["product_id", 'cost']], on='product_id')
+df['discount'] = df['discount'].fillna(0)
+df['discount_pct'] = df['discount_pct'].fillna(0)
+df['promotion'] = df['promotion'].fillna('Без акції')
+
+df['revenue'] = df['quantity'] * df['unit_price'] * (1 - df['discount']) * (1 - df['discount_pct'])
+df['total_cost'] = df['quantity'] * df['cost']
+df['margin_val'] = df['revenue'] - df['total_cost']
+
+
+orders_grouped = df.groupby(['order_id', 'promotion']).agg(
+    order_revenue=('revenue', 'sum'),
+    order_margin=('margin_val', 'sum')
+).reset_index()
+
+promo_analysis = orders_grouped.groupby('promotion').agg(
+    avg_check=('order_revenue', 'mean'),        
+    avg_margin=('order_margin', 'mean'),        
+    total_revenue=('order_revenue', 'sum'),    
+    total_margin=('order_margin', 'sum'),       
+    orders_count=('order_id', 'count')          
+).round(2)
+
+promo_analysis['margin_pct'] = (promo_analysis['total_margin'] / promo_analysis['total_revenue'] * 100).round(2)
+
+promo_analysis = promo_analysis.sort_values('avg_check', ascending=False).reset_index()
+
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+sns.barplot(data=promo_analysis, x='avg_check', y='promotion', ax=axes[0], palette='Blues_r')
+axes[0].set_title('Средний чек по акциям')
+axes[0].set_xlabel('Сумма чека')
+axes[0].set_ylabel('Промоакция')
+
+sns.barplot(data=promo_analysis, x='avg_margin', y='promotion', ax=axes[1], palette='Greens_d')
+axes[1].set_title('Средняя маржа заказа по акциям')
+axes[1].set_xlabel('Маржа')
+axes[1].set_ylabel('')
+
+plt.tight_layout()
 plt.show()
