@@ -274,7 +274,6 @@ plt.show()
 
 
 ########## ТОП КАТЕГОРІЇ
-products = load_products_to_df(connect)
 
 df = order_items.merge(products, on="product_id")
 
@@ -309,39 +308,17 @@ top_categories_margin = (
       .head(10)
 )
 
-print(top_products_revenue)
-print(top_products_margin)
-print(top_categories_revenue)
-print(top_categories_margin)
+fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 
-plt.figure(figsize=(10, 6))
-sns.barplot(data=top_products_revenue, x="revenue", y="product")
-plt.title("Top 10 Products by Revenue")
-plt.xlabel("Revenue")
-plt.ylabel("Product")
-plt.tight_layout()
-plt.show()
+sns.barplot(data=top_products_revenue, x="revenue", y="product", ax=ax[0, 0], palette='Set2')
+ax[0, 0].set_title("Top 10 Products by Revenue")
 
-plt.figure(figsize=(10, 6))
-sns.barplot(data=top_products_margin, x="margin", y="product")
-plt.title("Top 10 Products by Margin")
-plt.xlabel("Margin")
-plt.ylabel("Product")
-plt.tight_layout()
-plt.show()
+sns.barplot(data=top_products_margin, x="margin", y="product", ax=ax[0, 1], palette='Set2')
+ax[0, 1].set_title("Top 10 Products by Margin")
 
-plt.figure(figsize=(10, 6))
-sns.barplot(data=top_categories_revenue, x="revenue", y="category")
-plt.title("Top 10 Categories by Revenue")
-plt.xlabel("Revenue")
-plt.ylabel("Category")
-plt.tight_layout()
-plt.show()
+sns.barplot(data=top_categories_revenue, x="revenue", y="category", ax=ax[1, 0], palette='Set2')
+ax[1, 0].set_title("Top 10 Categories by Revenue")
 
-plt.figure(figsize=(10, 6))
-sns.barplot(data=top_categories_margin, x="margin", y="category")
-plt.title("Top 10 Categories by Margin")
-plt.xlabel("Margin")
-plt.ylabel("Category")
-plt.tight_layout()
+sns.barplot(data=top_categories_margin, x="margin", y="category", ax=ax[1, 1], palette='Set2')
+ax[1, 1].set_title("Top 10 Categories by Margin")
 plt.show()
