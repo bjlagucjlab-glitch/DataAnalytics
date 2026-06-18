@@ -44,7 +44,26 @@ def load_orders_to_df(conn) -> pd.DataFrame:
             """
     df = pd.read_sql_query(query, conn)
     return df
-
+    
+def load_products_to_df(conn) -> pd.DataFrame:
+    query = """
+            SELECT 
+                p.product_id
+                , p.name AS product
+                , c.name AS category
+                , s.name AS supplier
+                , s.country
+                , s.rating
+                , p.price
+                , p.cost
+                , p.is_active
+            FROM products p
+            JOIN categories c ON c.category_id = p.category_id
+            JOIN suppliers s ON s.supplier_id = p.supplier_id
+            """
+    df = pd.read_sql_query(query, conn)
+    return df
+    
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(HERE, 'online_store.db')
 connect = get_connection()
@@ -56,3 +75,5 @@ order_items = load_order_items_to_df(connect)
 
 orders = load_orders_to_df(connect)
 # print(orders.head(5))
+
+products = load_products_to_df(connect)
