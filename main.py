@@ -435,3 +435,25 @@ revenue_df.to_csv('revenue_mart.csv',index=False)
 
 print(revenue_df.head())
 print(revenue_df.shape)
+
+#Уякому місяці ми продаємо найкраще
+
+revenue_df['order_date'] = pd.to_datetime(revenue_df['order_date'])
+orders_revenue = revenue_df.groupby(['order_id', 'order_date'])['revenue'].sum().reset_index()
+orders_revenue['month'] = orders_revenue['order_date'].dt.month
+month_revenue = orders_revenue.groupby('month')['revenue'].mean().reset_index()
+
+print(month_revenue)
+
+sns.barplot(data=month_revenue, x='month', y='revenue')
+plt.title('Середня виручка за місяцями')
+plt.xlabel('Місяць')
+plt.ylabel('Середня виручка')
+
+plt.show()
+
+best_month = month_revenue.loc[month_revenue['revenue'].idxmax(),'month']
+
+print('Місяць з найбільшою середньою виручкою:', best_month)
+
+print(revenue_df.head())
