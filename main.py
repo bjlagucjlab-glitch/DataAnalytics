@@ -402,3 +402,24 @@ axes[1].set_ylabel('')
 
 plt.tight_layout()
 plt.show()
+
+
+#Способи оплати
+
+order_by_method=(payments.groupby('method')['order_id'].nunique().reset_index(name='order_count'))
+revenue_by_method=(payments.groupby('method')['amount'].sum().reset_index(name='payments_sum'))
+
+order_revenue=(revenue_df.groupby('order_id')['revenue'].sum().reset_index())
+check_df=order_revenue.merge(payments.groupby('order_id')['amount'].sum().reset_index(),on='order_id',how='left')
+
+check_df['amount']=check_df['amount'].fillna(0)
+check_df['difference']=(check_df['revenue']-check_df['amount'])
+check_df['revenue']=check_df['revenue'].round(2)
+check_df['amount']=check_df['amount'].round(2)
+
+no_payment= check_df[check_df['amount']==0]
+print('Кількість замовлень без оплат',len(no_payment))
+
+difference=check_df[check_df['difference'].abs()>0.01]
+print(difference)
+print(check_df.head(20))
