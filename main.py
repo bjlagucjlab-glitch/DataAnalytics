@@ -402,3 +402,15 @@ axes[1].set_ylabel('')
 
 plt.tight_layout()
 plt.show()
+
+#Зібрати з таблиць orders і order_items єдиний DataFrame з доходом на рівні рядка замовлення:
+completed_orders = orders[orders['status'] == 'completed']
+
+revenue_df = completed_orders.merge(order_items,on='order_id',how='inner')
+
+revenue_df['revenue'] = (revenue_df['quantity']* revenue_df['unit_price']* (1 - revenue_df['discount']))
+
+revenue_df.to_csv('revenue_mart.csv',index=False)
+
+print(revenue_df.head())
+print(revenue_df.shape)
