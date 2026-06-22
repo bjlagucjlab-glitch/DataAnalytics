@@ -457,3 +457,40 @@ best_month = month_revenue.loc[month_revenue['revenue'].idxmax(),'month']
 print('Місяць з найбільшою середньою виручкою:', best_month)
 
 print(revenue_df.head())
+
+# Скільки ми втрачаємо через скасування?
+total_orders = len(orders)
+
+cancelled_orders = len(
+orders[orders["status"].str.lower() == "cancelled"]
+)
+
+cancelled_share = round(
+cancelled_orders / total_orders * 100,
+2
+)
+
+print(f"Cancelled orders: {cancelled_orders}")
+print(f"Total orders: {total_orders}")
+print(f"Share of cancelled orders: {cancelled_share}%")
+
+cancel_data = pd.DataFrame({
+"Status": ["Cancelled", "Completed"],
+"Count": [
+cancelled_orders,
+total_orders - cancelled_orders
+]
+})
+
+plt.figure(figsize=(6, 4))
+sns.barplot(
+data=cancel_data,
+x="Status",
+y="Count"
+)
+
+plt.title("Cancelled vs Other Orders")
+plt.xlabel("Order Status")
+plt.ylabel("Number of Orders")
+plt.tight_layout()
+plt.show()
