@@ -5,9 +5,12 @@
 
 Ірина:
 -- Динаміка продажів за місяцями. Побудувати графік доходу та кількості замовлень за місяцями за весь період (2022–2025). Використати лінійний графік Seaborn і додати ковзне середнє.
-Висновок: 
+Висновок: Доходи компанії, як і кількість замовлень, зростали протягом майже всього періоду, а наприкінці 2025 року стався різкий стрибок замовлень і доходів.
 -- Топкатегорії та товари. Визначити ТОП-10 товарів і ТОП-категорій за доходом та за маржею (price - cost). Представити результати у вигляді горизонтальних стовпчикових діаграм.
-Висновок:
+Висновок: Топ-10 товарів за доходом: 1. Laptops Ultra. 2. Laptops Pro. 3. Laptops Pro. 4. Laptops Core. 5. Laptops Prime. 6. Laptops Max. 7. Laptops Air. 8. Laptops Prime. 9. Laptops Eco. 10. Smartphones Prime.
+Топ-10 товарів за маржею: 1. Laptops Pro. 2. Laptops Pro. 3. Laptops Air. 4. Cameras Smart. 5. Laptops Core. 6. Laptops Plus. 7. Smartphones Lite. 8. Smartphones Ultra. 9. Cameras Max. 10. Smartphones Classic.
+Топ-10 категорій за доходом: 1. Cameras. 2. Smartphones. 3. Laptops. 4. Cycling. 5. Monitors. 6. Appliances. 7. Furniture. 8. Camping. 9. Fitness. 10. Headphones.
+Топ-10 категорій за маржею: 1. Cameras. 2. Smartphones. 3. Laptops. 4. Cycling. 5. Monitors. 6. Furniture. 7. Appliances. 8. Camping. 9. Headphones. 10. Fitness.
 
 Анастасія:
 -- Способи оплати. Проаналізувати частку доходу та кількість замовлень за значенням payments.method. Звірити суму платежів із сумою замовлень і виявити розбіжності (зокрема замовлення, для яких відсутня оплата).
