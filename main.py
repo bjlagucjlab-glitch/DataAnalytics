@@ -404,6 +404,19 @@ plt.tight_layout()
 plt.show()
 
 
+
+# Вітрина доходу.
+completed_orders = orders[orders['status'] == 'completed']
+
+revenue_df = completed_orders.merge(order_items,on='order_id',how='inner')
+
+revenue_df['revenue'] = (revenue_df['quantity']* revenue_df['unit_price']* (1 - revenue_df['discount']))
+
+revenue_df.to_csv('revenue_mart.csv',index=False)
+
+print(revenue_df.head())
+print(revenue_df.shape)
+
 #Способи оплати
 
 order_by_method=(payments.groupby('method')['order_id'].nunique().reset_index(name='order_count'))
@@ -423,18 +436,6 @@ print('Кількість замовлень без оплат',len(no_payment))
 difference=check_df[check_df['difference'].abs()>0.01]
 print(difference)
 print(check_df.head(20))
-
-# Вітрина доходу.
-completed_orders = orders[orders['status'] == 'completed']
-
-revenue_df = completed_orders.merge(order_items,on='order_id',how='inner')
-
-revenue_df['revenue'] = (revenue_df['quantity']* revenue_df['unit_price']* (1 - revenue_df['discount']))
-
-revenue_df.to_csv('revenue_mart.csv',index=False)
-
-print(revenue_df.head())
-print(revenue_df.shape)
 
 #Уякому місяці ми продаємо найкраще
 
